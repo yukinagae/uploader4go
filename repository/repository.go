@@ -2,9 +2,11 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/coopernurse/gorp"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
 	"time"
 )
 
@@ -34,7 +36,16 @@ func NewPost(title string, file []byte) Post {
 }
 
 func initDB() *gorp.DbMap {
-	db, err := sql.Open("sqlite3", "/tmp/post_db.bin")
+
+	db_path := os.Getenv("HOME") + "\\.up4go\\"
+
+	os.Mkdir(db_path, 0777)
+
+	db_full_path := db_path + ".postdb.bin"
+
+	fmt.Println(db_full_path)
+
+	db, err := sql.Open("sqlite3", db_full_path)
 
 	checkErr(err, "sql.Open failed")
 
