@@ -8,10 +8,6 @@ import (
 	"text/template"
 )
 
-type Page struct {
-	Title string
-}
-
 func main() {
 	fmt.Println("helo")
 
