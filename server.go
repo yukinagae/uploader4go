@@ -13,6 +13,67 @@ import (
 	"text/template"
 )
 
+var list = `<html>
+<head>
+	<title>UP4go</title>
+</head>
+<body>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>File Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{range $index, $element := . }}
+			<tr>
+				<td><a href="http://127.0.0.1:3000/files/{{ .Id }}">{{ .Id }}</a></td>
+				<td>{{ $element.Title }}</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+
+	<form enctype="multipart/form-data" action="http://127.0.0.1:3000/files" method="post">
+		<input type="file" name="uploadfile" />
+		<input type="submit" value="UPLOAD" />
+	</form>
+	<body>
+</html>
+`
+
+var detail = `
+<html>
+<head>
+	<title>UP4go</title>
+</head>
+<body>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>File Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ .Id }}</td>
+				<td>{{ .Title }}</td>
+			</tr>
+		</tbody>
+	</table>
+	<form action="http://127.0.0.1:3000/download/{{ .Id }}" method="GET">
+		<input type="submit" value="DOWNLOAD" />
+	</form>
+	<form action="http://127.0.0.1:3000/delete/{{ .Id }}" method="POST">
+		<input type="submit" value="DELETE" />
+	</form>
+	<a href="http://127.0.0.1:3000/">To List</a>
+	<body>
+</html>
+`
+
 func main() {
 
 	repo := repository.NewRepo()
@@ -23,7 +84,7 @@ func main() {
 	// routing
 	// GET /
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t, _ := template.ParseFiles("list.html")
+		t, _ := template.New("LIST").Parse(list)
 		posts := repo.List()
 		t.Execute(w, posts)
 	}).Methods("GET")
@@ -40,7 +101,7 @@ func main() {
 	}).Methods("POST")
 	// GET /files/:id
 	r.HandleFunc("/files/{id}", func(w http.ResponseWriter, r *http.Request) {
-		t, _ := template.ParseFiles("detail.html")
+		t, _ := template.New("DETAIL").Parse(detail)
 
 		vars := mux.Vars(r)
 		fmt.Println(vars)
@@ -54,7 +115,6 @@ func main() {
 	r.HandleFunc("/download/{id}", func(w http.ResponseWriter, r *http.Request) {
 
 		vars := mux.Vars(r)
-		fmt.Println(vars)
 		id := vars["id"]
 		pk, _ := strconv.ParseInt(id, 10, 64)
 		post := repo.Select(pk)
@@ -69,7 +129,6 @@ func main() {
 	r.HandleFunc("/delete/{id}", func(w http.ResponseWriter, r *http.Request) {
 
 		vars := mux.Vars(r)
-		fmt.Println(vars)
 		id := vars["id"]
 		pk, _ := strconv.ParseInt(id, 10, 64)
 		repo.Delete(pk)
