@@ -1,0 +1,28 @@
+<html>
+<head>
+	<title>UP4go</title>
+</head>
+<body>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>File Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{range $index, $element := . }}
+			<tr>
+				<td><a href="http://127.0.0.1:3000/files/{{ .Id }}">{{ .Id }}</a></td>
+				<td>{{ $element.Title }}</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+
+	<form enctype="multipart/form-data" action="http://127.0.0.1:3000/files" method="post">
+		<input type="file" name="uploadfile" />
+		<input type="submit" value="UPLOAD" />
+	</form>
+	<body>
+</html>

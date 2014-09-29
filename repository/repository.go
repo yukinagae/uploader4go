@@ -1,10 +1,9 @@
-package main
+package repository
 
 import (
 	"database/sql"
 	"github.com/coopernurse/gorp"
 	_ "github.com/mattn/go-sqlite3"
-	"io/ioutil"
 	"log"
 	"time"
 )
@@ -20,13 +19,13 @@ type Repository struct {
 	dbmap *gorp.DbMap
 }
 
-func newRepo() Repository {
+func NewRepo() Repository {
 	return Repository{
 		dbmap: initDB(),
 	}
 }
 
-func newPost(title string, file []byte) Post {
+func NewPost(title string, file []byte) Post {
 	return Post{
 		Created: time.Now().UnixNano(),
 		Title:   title,
@@ -66,22 +65,17 @@ func (repo Repository) List() []Post {
 	return posts
 }
 
-func (repo Repository) Close() {
-	repo.dbmap.Db.Close()
+func (repo Repository) Select(id int64) Post {
+	var post Post
+	repo.dbmap.SelectOne(&post, "select * from posts where post_id=?", id)
+	return post
 }
 
-func main() {
+func (repo Repository) Delete(id int64) {
+	post := repo.Select(id)
+	repo.dbmap.Delete(&post)
+}
 
-	repo := newRepo()
-
-	defer repo.Close()
-
-	file_name := "hoge.txt"
-
-	// TODO
-	file, _ := ioutil.ReadFile(file_name)
-
-	// create two posts
-	p1 := newPost(file_name, file)
-	repo.Insert(p1)
+func (repo Repository) Close() {
+	repo.dbmap.Db.Close()
 }
